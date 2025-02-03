@@ -44,13 +44,13 @@ jobs:
       run: make -j3 redist
 
     - name: Upload artifact mkljczk-proton-bleeding-edge.tar.gz
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: mkljczk-proton-bleeding-edge.tar.gz
+        name: mkljczk-proton-bleeding-edge-${{ github.run_id }}.tar.gz
         path: ./build/mkljczk-proton-bleeding-edge.tar.gz
 
     - name: Upload artifact mkljczk-proton-bleeding-edge.sha512sum
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: mkljczk-proton-bleeding-edge.sha512sum
+        name: mkljczk-proton-bleeding-edge-${{ github.run_id }}.sha512sum
         path: ./build/mkljczk-proton-bleeding-edge.sha512sum
