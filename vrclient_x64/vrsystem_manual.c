@@ -54,14 +54,12 @@ static BOOL wait_vr_key_ready( HKEY vr_key )
     return ret;
 }
 
-VkResult fixup_get_output_device_pre( uint32_t *texture_type, VkInstance *instance )
+VkResult fixup_get_output_device_pre( HMODULE winevulkan, uint32_t *texture_type, VkInstance *instance )
 {
     /* OpenVR IVRSystem::GetOutputDevice requires a VkInstance if textureType is Vulkan,
      * so we create one here. */
-    static const WCHAR winevulkanW[] = {'w','i','n','e','v','u','l','k','a','n','.','d','l','l',0};
     BOOL has_get_device_properties2, has_external_memory_caps;
     PFN_vkGetInstanceProcAddr p_vkGetInstanceProcAddr;
-    HMODULE winevulkan = LoadLibraryW(winevulkanW);
     PFN_vkCreateInstance p_vkCreateInstance;
     const char **instance_extension_list;
     DWORD type, len, extension_count = 0;
@@ -149,12 +147,10 @@ VkResult fixup_get_output_device_pre( uint32_t *texture_type, VkInstance *instan
     return vk_result;
 }
 
-void fixup_get_output_device_post( uint64_t *device, VkInstance *instance, uint32_t original_texture_type )
+void fixup_get_output_device_post( HMODULE winevulkan, uint64_t *device, VkInstance *instance, uint32_t original_texture_type )
 {
-    static const WCHAR winevulkanW[] = {'w','i','n','e','v','u','l','k','a','n','.','d','l','l',0};
     PFN_vkGetPhysicalDeviceProperties2 p_vkGetPhysicalDeviceProperties2;
     PFN_vkGetInstanceProcAddr p_vkGetInstanceProcAddr;
-    HMODULE winevulkan = LoadLibraryW(winevulkanW);
     PFN_vkDestroyInstance p_vkDestroyInstance;
     VkPhysicalDeviceIDProperties id_props = {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES,
@@ -301,6 +297,8 @@ void __thiscall winIVRSystem_IVRSystem_022_GetDXGIOutputInfo( struct w_steam_ifa
     *pnAdapterIndex = 0;
 }
 
+static const WCHAR winevulkanW[] = {'w','i','n','e','v','u','l','k','a','n','.','d','l','l',0};
+
 void __thiscall winIVRSystem_IVRSystem_016_GetOutputDevice(struct w_steam_iface *_this, uint64_t *pnDevice, uint32_t textureType, VkInstance_T *pInstance)
 {
     struct IVRSystem_IVRSystem_017_GetOutputDevice_params params =
@@ -310,14 +308,17 @@ void __thiscall winIVRSystem_IVRSystem_016_GetOutputDevice(struct w_steam_iface 
         .textureType = textureType,
         .pInstance = pInstance,
     };
+    HMODULE winevulkan = LoadLibraryW(winevulkanW);
+
     TRACE("%p\n", _this);
-    if (fixup_get_output_device_pre( &params.textureType, &params.pInstance ) != VK_SUCCESS)
-    {
+    if (fixup_get_output_device_pre( winevulkan, &params.textureType, &params.pInstance ) != VK_SUCCESS)
         *pnDevice = 0;
-        return;
+    else
+    {
+        VRCLIENT_CALL( IVRSystem_IVRSystem_016_GetOutputDevice, &params );
+        fixup_get_output_device_post( winevulkan, pnDevice, &params.pInstance, textureType );
     }
-    VRCLIENT_CALL( IVRSystem_IVRSystem_016_GetOutputDevice, &params );
-    fixup_get_output_device_post(pnDevice, &params.pInstance, textureType);
+    FreeLibrary(winevulkan);
 }
 
 void __thiscall winIVRSystem_IVRSystem_017_GetOutputDevice(struct w_steam_iface *_this, uint64_t *pnDevice, uint32_t textureType, VkInstance_T *pInstance)
@@ -329,14 +330,17 @@ void __thiscall winIVRSystem_IVRSystem_017_GetOutputDevice(struct w_steam_iface 
         .textureType = textureType,
         .pInstance = pInstance,
     };
+    HMODULE winevulkan = LoadLibraryW(winevulkanW);
+
     TRACE("%p\n", _this);
-    if (fixup_get_output_device_pre( &params.textureType, &params.pInstance ) != VK_SUCCESS)
-    {
+    if (fixup_get_output_device_pre( winevulkan, &params.textureType, &params.pInstance ) != VK_SUCCESS)
         *pnDevice = 0;
-        return;
+    else
+    {
+        VRCLIENT_CALL( IVRSystem_IVRSystem_017_GetOutputDevice, &params );
+        fixup_get_output_device_post( winevulkan, pnDevice, &params.pInstance, textureType );
     }
-    VRCLIENT_CALL( IVRSystem_IVRSystem_017_GetOutputDevice, &params );
-    fixup_get_output_device_post(pnDevice, &params.pInstance, textureType);
+    FreeLibrary(winevulkan);
 }
 
 void __thiscall winIVRSystem_IVRSystem_019_GetOutputDevice(struct w_steam_iface *_this, uint64_t *pnDevice, uint32_t textureType, VkInstance_T *pInstance)
@@ -348,14 +352,17 @@ void __thiscall winIVRSystem_IVRSystem_019_GetOutputDevice(struct w_steam_iface 
         .textureType = textureType,
         .pInstance = pInstance,
     };
+    HMODULE winevulkan = LoadLibraryW(winevulkanW);
+
     TRACE("%p\n", _this);
-    if (fixup_get_output_device_pre( &params.textureType, &params.pInstance ) != VK_SUCCESS)
-    {
+    if (fixup_get_output_device_pre( winevulkan, &params.textureType, &params.pInstance ) != VK_SUCCESS)
         *pnDevice = 0;
-        return;
+    else
+    {
+        VRCLIENT_CALL( IVRSystem_IVRSystem_019_GetOutputDevice, &params );
+        fixup_get_output_device_post( winevulkan, pnDevice, &params.pInstance, textureType );
     }
-    VRCLIENT_CALL( IVRSystem_IVRSystem_019_GetOutputDevice, &params );
-    fixup_get_output_device_post(pnDevice, &params.pInstance, textureType);
+    FreeLibrary(winevulkan);
 }
 
 void __thiscall winIVRSystem_IVRSystem_020_GetOutputDevice(struct w_steam_iface *_this, uint64_t *pnDevice, uint32_t textureType, VkInstance_T *pInstance)
@@ -367,14 +374,17 @@ void __thiscall winIVRSystem_IVRSystem_020_GetOutputDevice(struct w_steam_iface 
         .textureType = textureType,
         .pInstance = pInstance,
     };
+    HMODULE winevulkan = LoadLibraryW(winevulkanW);
+
     TRACE("%p\n", _this);
-    if (fixup_get_output_device_pre( &params.textureType, &params.pInstance ) != VK_SUCCESS)
-    {
+    if (fixup_get_output_device_pre( winevulkan, &params.textureType, &params.pInstance ) != VK_SUCCESS)
         *pnDevice = 0;
-        return;
+    else
+    {
+        VRCLIENT_CALL( IVRSystem_IVRSystem_020_GetOutputDevice, &params );
+        fixup_get_output_device_post( winevulkan, pnDevice, &params.pInstance, textureType );
     }
-    VRCLIENT_CALL( IVRSystem_IVRSystem_020_GetOutputDevice, &params );
-    fixup_get_output_device_post(pnDevice, &params.pInstance, textureType);
+    FreeLibrary(winevulkan);
 }
 
 void __thiscall winIVRSystem_IVRSystem_021_GetOutputDevice(struct w_steam_iface *_this, uint64_t *pnDevice, uint32_t textureType, VkInstance_T *pInstance)
@@ -386,14 +396,17 @@ void __thiscall winIVRSystem_IVRSystem_021_GetOutputDevice(struct w_steam_iface 
         .textureType = textureType,
         .pInstance = pInstance,
     };
+    HMODULE winevulkan = LoadLibraryW(winevulkanW);
+
     TRACE("%p\n", _this);
-    if (fixup_get_output_device_pre( &params.textureType, &params.pInstance ) != VK_SUCCESS)
-    {
+    if (fixup_get_output_device_pre( winevulkan, &params.textureType, &params.pInstance ) != VK_SUCCESS)
         *pnDevice = 0;
-        return;
+    else
+    {
+        VRCLIENT_CALL( IVRSystem_IVRSystem_021_GetOutputDevice, &params );
+        fixup_get_output_device_post( winevulkan, pnDevice, &params.pInstance, textureType );
     }
-    VRCLIENT_CALL( IVRSystem_IVRSystem_021_GetOutputDevice, &params );
-    fixup_get_output_device_post(pnDevice, &params.pInstance, textureType);
+    FreeLibrary(winevulkan);
 }
 
 
@@ -406,13 +419,16 @@ void __thiscall winIVRSystem_IVRSystem_022_GetOutputDevice(struct w_steam_iface 
         .textureType = textureType,
         .pInstance = pInstance,
     };
+    HMODULE winevulkan = LoadLibraryW(winevulkanW);
+
     TRACE("%p\n", _this);
-    if (fixup_get_output_device_pre( &params.textureType, &params.pInstance ) != VK_SUCCESS)
-    {
+    if (fixup_get_output_device_pre( winevulkan, &params.textureType, &params.pInstance ) != VK_SUCCESS)
         *pnDevice = 0;
-        return;
+    else
+    {
+        VRCLIENT_CALL( IVRSystem_IVRSystem_022_GetOutputDevice, &params );
+        fixup_get_output_device_post( winevulkan, pnDevice, &params.pInstance, textureType );
     }
-    VRCLIENT_CALL( IVRSystem_IVRSystem_022_GetOutputDevice, &params );
-    fixup_get_output_device_post(pnDevice, &params.pInstance, textureType);
+    FreeLibrary(winevulkan);
 }
 
