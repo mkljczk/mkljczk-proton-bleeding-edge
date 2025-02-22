@@ -37,7 +37,7 @@ jobs:
 
     - name: Configure
       working-directory: ./build
-      run: ../configure.sh --build-name=mkljczk-proton-bleeding-edge --enable-ccache --container-engine=docker
+      run: ../configure.sh --build-name=mkljczk-proton-bleeding-edge --container-engine=docker
 
     - name: Make mkljczk-proton-bleeding-edge
       working-directory: ./build
