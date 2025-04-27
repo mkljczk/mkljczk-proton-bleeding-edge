@@ -2,16 +2,9 @@
 
 ### (1) PREP SECTION ###
 
-# NOTE: Nvidia reflex patches are disabled now as they are currently not ready/problematic/known to cause stutters
-# I was pinged about it from DXVK dev discord.
-# https://github.com/doitsujin/dxvk/pull/3690#discussion_r1405306492
-
     pushd dxvk
     git reset --hard HEAD
     git clean -xdf
-    #echo "DXVK: -Nvidia Reflex- Add NV low latency support"
-    #pushd include/vulkan; git pull; git checkout bbe0f575ebd6098369f0ac6c6a43532732ed0ba6; popd
-    #patch -Np1 < ../patches/proton/80-nv_low_latency_dxvk.patch
     popd
 
     pushd vkd3d-proton
@@ -23,8 +16,6 @@
     pushd dxvk-nvapi
     git reset --hard HEAD
     git clean -xdf
-    #echo "DXVK-NVAPI: -Nvidia Reflex- Add support for Reflex"
-    #patch -Np1 < ../patches/proton/82-nv_low_latency_dxvk_nvapi.patch
     popd
 
     pushd gstreamer
@@ -371,11 +362,12 @@
     echo "WINE: -CUSTOM- Add WINE_NO_WM_DECORATION option to disable window decorations so that borders behave properly"
     patch -Np1 < ../patches/proton/WINE_NO_WM_DECORATION.patch
 
-    echo "WINE: -CUSTOM- Add josh's flat theme patch to compensate for defaulting to not allowing system window decorations by using a more modern default theme"
-    patch -Np1 < ../patches/proton/josh-flat-theme.patch
-
     echo "WINE: -CUSTOM- Add PROTON_PREFER_SDL option to make it not prefer hidraw and instead expose both sdl and hidraw"
     patch -Np1 < ../patches/proton/PREFER_SDL.patch
+
+    # https://github.com/ValveSoftware/wine/pull/269
+    echo "WINE: -PENDING- Hid multi TLC and Fanatec wheel-bases hidraw white-list"
+    patch -Np1 < ../patches/wine-hotfixes/pending/hid-multi-tlc-and-ftec-hidraw-269.patch
 
     popd
 
